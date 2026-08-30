@@ -1,0 +1,522 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PeakLog - Peakbagging Tracker</title>
+  <meta name="description" content="PeakLog is a peakbagging tracker for hikers who want to track summit lists, log completed peaks, explore maps, and sync progress with iCloud.">
+  <meta property="og:title" content="PeakLog - Peakbagging Tracker">
+  <meta property="og:description" content="Track peakbagging lists, log completed summits, explore nearby peaks, and keep progress synced.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="./assets/track-peakbagging-lists.jpg">
+  <style>
+    :root {
+      --deep: #0f3f3f;
+      --deep-2: #0a2f32;
+      --teal: #3ba59a;
+      --teal-2: #247a73;
+      --mint: #e6f5ef;
+      --cream: #f8fff9;
+      --gold: #ffd95b;
+      --ink: #0d3838;
+      --muted: #4f7773;
+      --line: rgba(13, 56, 56, 0.14);
+      --shadow: rgba(6, 40, 42, 0.24);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      font-family: ui-rounded, "SF Pro Rounded", "Avenir Next", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        repeating-linear-gradient(-8deg, rgba(58, 126, 122, 0.14) 0, rgba(58, 126, 122, 0.14) 4px, transparent 4px, transparent 74px),
+        linear-gradient(180deg, var(--cream), var(--mint));
+      line-height: 1.5;
+    }
+
+    a { color: inherit; }
+
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(248, 255, 249, 0.86);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(18px);
+    }
+
+    .nav-inner {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 14px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 900;
+      font-size: 22px;
+      text-decoration: none;
+    }
+
+    .brand-mark {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: block;
+      object-fit: cover;
+      background: var(--deep);
+      box-shadow: 0 8px 18px var(--shadow);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      color: var(--muted);
+      font-weight: 800;
+      font-size: 14px;
+    }
+
+    .nav-links a { text-decoration: none; }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 48px;
+      padding: 0 20px;
+      border-radius: 16px;
+      border: 0;
+      color: var(--cream);
+      background: linear-gradient(135deg, var(--teal), var(--deep));
+      box-shadow: 0 10px 0 var(--deep-2);
+      font-weight: 900;
+      text-decoration: none;
+      transition: transform 160ms ease, box-shadow 160ms ease;
+    }
+
+    .button:hover {
+      transform: translateY(2px);
+      box-shadow: 0 8px 0 var(--deep-2);
+    }
+
+    .button.secondary {
+      color: var(--ink);
+      background: var(--mint);
+      box-shadow: none;
+      border: 1px solid var(--line);
+    }
+
+    .hero {
+      max-width: 1120px;
+      min-height: calc(100vh - 66px);
+      margin: 0 auto;
+      padding: 78px 22px 54px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.02fr) minmax(320px, 0.72fr);
+      align-items: center;
+      gap: 56px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      padding: 7px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.72);
+      color: var(--teal-2);
+      font-weight: 900;
+      font-size: 14px;
+    }
+
+    h1 {
+      max-width: 780px;
+      margin: 18px 0 16px;
+      font-size: clamp(48px, 8vw, 94px);
+      line-height: 0.94;
+      letter-spacing: 0;
+    }
+
+    .hero-copy {
+      max-width: 620px;
+      margin: 0 0 28px;
+      color: var(--muted);
+      font-size: clamp(19px, 2.2vw, 24px);
+      font-weight: 750;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .hero-stats {
+      margin-top: 34px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      max-width: 620px;
+    }
+
+    .stat {
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid var(--line);
+    }
+
+    .stat strong {
+      display: block;
+      color: var(--deep);
+      font-size: 26px;
+      line-height: 1;
+    }
+
+    .stat span {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .phone-stack {
+      position: relative;
+      min-height: 640px;
+      display: grid;
+      place-items: center;
+    }
+
+    .phone-shot {
+      width: min(100%, 360px);
+      border-radius: 42px;
+      display: block;
+      box-shadow: 0 30px 70px rgba(7, 48, 50, 0.32);
+      border: 8px solid rgba(255, 255, 255, 0.7);
+    }
+
+    .floating-card {
+      position: absolute;
+      left: 0;
+      bottom: 42px;
+      width: min(260px, 72%);
+      padding: 16px;
+      border-radius: 18px;
+      color: var(--cream);
+      background: linear-gradient(135deg, var(--teal), var(--deep));
+      box-shadow: 0 12px 0 var(--deep-2);
+      font-weight: 900;
+    }
+
+    .section { padding: 82px 22px; }
+
+    .section-inner {
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+
+    .section-title {
+      max-width: 760px;
+      margin: 0 0 34px;
+    }
+
+    h2 {
+      margin: 0 0 12px;
+      font-size: clamp(34px, 4vw, 58px);
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .section-title p,
+    .feature p,
+    .cta p {
+      color: var(--muted);
+      font-weight: 750;
+      font-size: 18px;
+      margin: 0;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .feature {
+      min-height: 230px;
+      padding: 22px;
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.76);
+      border: 1px solid var(--line);
+      box-shadow: 0 16px 38px rgba(7, 48, 50, 0.08);
+    }
+
+    .icon {
+      width: 52px;
+      height: 52px;
+      margin-bottom: 18px;
+      border-radius: 15px;
+      display: grid;
+      place-items: center;
+      color: var(--gold);
+      background: linear-gradient(135deg, var(--teal), var(--deep));
+      font-size: 26px;
+      font-weight: 900;
+    }
+
+    .feature h3 {
+      margin: 0 0 8px;
+      font-size: 24px;
+      line-height: 1.1;
+    }
+
+    .showcase {
+      background: linear-gradient(180deg, var(--deep), var(--deep-2));
+      color: var(--cream);
+      overflow: hidden;
+    }
+
+    .showcase .section-title p { color: rgba(248, 255, 249, 0.76); }
+
+    .screens {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(210px, 1fr));
+      gap: 18px;
+      overflow-x: auto;
+      padding: 6px 0 22px;
+      scroll-snap-type: x mandatory;
+    }
+
+    .screens img {
+      width: 100%;
+      min-width: 210px;
+      border-radius: 28px;
+      border: 4px solid rgba(255, 255, 255, 0.18);
+      box-shadow: 0 24px 50px rgba(0, 0, 0, 0.24);
+      scroll-snap-align: start;
+    }
+
+    .cta {
+      padding: 72px 22px;
+      background: var(--cream);
+    }
+
+    .cta-box {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 42px;
+      border-radius: 28px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 24px;
+      color: var(--cream);
+      background: linear-gradient(135deg, var(--teal), var(--deep));
+      box-shadow: 0 16px 0 var(--deep-2);
+    }
+
+    .cta h2 { margin-bottom: 10px; }
+    .cta p { color: rgba(248, 255, 249, 0.78); }
+
+    .cta .button {
+      background: var(--gold);
+      color: var(--deep);
+      box-shadow: 0 8px 0 rgba(7, 48, 50, 0.42);
+      white-space: nowrap;
+    }
+
+    footer {
+      padding: 28px 22px 42px;
+      background: var(--cream);
+      color: var(--muted);
+      font-weight: 750;
+    }
+
+    .footer-inner {
+      max-width: 1120px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+      border-top: 1px solid var(--line);
+      padding-top: 22px;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 860px) {
+      .nav-links a:not(.button) { display: none; }
+
+      .hero {
+        min-height: auto;
+        padding-top: 54px;
+        grid-template-columns: 1fr;
+        gap: 34px;
+      }
+
+      .phone-stack { min-height: 520px; }
+      .phone-shot { width: min(78vw, 340px); }
+
+      .floating-card {
+        left: max(0px, calc(50% - 210px));
+        bottom: 8px;
+      }
+
+      .features,
+      .hero-stats,
+      .cta-box {
+        grid-template-columns: 1fr;
+      }
+
+      .cta-box { padding: 28px; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav" aria-label="Main navigation">
+    <div class="nav-inner">
+      <a class="brand" href="#top" aria-label="PeakLog home">
+        <img class="brand-mark" src="./assets/peaklog-icon.png" alt="">
+        PeakLog
+      </a>
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#screenshots">Screenshots</a>
+        <a href="mailto:peaklogfeedback@gmail.com">Contact</a>
+        <a class="button secondary" href="https://apps.apple.com/us/app/peaklog-peak-bagging-tracker/id6759690599">App Store</a>
+      </div>
+    </div>
+  </nav>
+
+  <main id="top">
+    <section class="hero">
+      <div>
+        <span class="eyebrow">Built for peakbaggers</span>
+        <h1>Track every summit list in one place.</h1>
+        <p class="hero-copy">
+          PeakLog helps hikers organize peakbagging lists, log completed summits, explore nearby peaks, and keep progress synced when mountains appear across multiple challenges.
+        </p>
+        <div class="actions">
+          <a class="button" href="https://apps.apple.com/us/app/peaklog-peak-bagging-tracker/id6759690599">Download on the App Store</a>
+          <a class="button secondary" href="#features">See features</a>
+        </div>
+        <div class="hero-stats" aria-label="PeakLog highlights">
+          <div class="stat">
+            <strong>Lists</strong>
+            <span>Track regional challenges</span>
+          </div>
+          <div class="stat">
+            <strong>Map</strong>
+            <span>Explore nearby summits</span>
+          </div>
+          <div class="stat">
+            <strong>iCloud</strong>
+            <span>Sync your progress</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="phone-stack" aria-hidden="true">
+        <img class="phone-shot" src="./assets/track-peakbagging-lists.jpg" alt="">
+        <div class="floating-card">Complete a peak once. Keep progress connected across lists.</div>
+      </div>
+    </section>
+
+    <section class="section" id="features">
+      <div class="section-inner">
+        <div class="section-title">
+          <h2>A cleaner logbook for peakbagging.</h2>
+          <p>Less spreadsheet wrangling, more time planning the next summit.</p>
+        </div>
+        <div class="features">
+          <article class="feature">
+            <div class="icon">✓</div>
+            <h3>Track List Progress</h3>
+            <p>Follow summit challenges like the NH 48, Northeast 111, Colorado 14ers, state high points, and more.</p>
+          </article>
+          <article class="feature">
+            <div class="icon">⌁</div>
+            <h3>Save Shared Peaks</h3>
+            <p>When one mountain appears on multiple lists, PeakLog keeps that completion connected everywhere.</p>
+          </article>
+          <article class="feature">
+            <div class="icon">⌖</div>
+            <h3>Explore the Map</h3>
+            <p>Search, filter, and browse peaks geographically so you can see what is nearby and what is still open.</p>
+          </article>
+          <article class="feature">
+            <div class="icon">✎</div>
+            <h3>Log the Details</h3>
+            <p>Add completion dates, hike notes, and photos to build a summit history that feels personal.</p>
+          </article>
+          <article class="feature">
+            <div class="icon">☁</div>
+            <h3>Sync with iCloud</h3>
+            <p>Keep your progress saved and available across your Apple devices when iCloud is enabled.</p>
+          </article>
+          <article class="feature">
+            <div class="icon">＋</div>
+            <h3>Request What Is Missing</h3>
+            <p>Ask for new lists, report bugs, or suggest features from inside the app.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section showcase" id="screenshots">
+      <div class="section-inner">
+        <div class="section-title">
+          <h2>Made for summit goals.</h2>
+          <p>Track progress, log hikes, browse list libraries, and map peaks without turning your peakbagging into homework.</p>
+        </div>
+        <div class="screens" aria-label="PeakLog screenshots">
+          <img src="./assets/track-peakbagging-lists.jpg" alt="PeakLog list progress screenshot">
+          <img src="./assets/log-every-summit.jpg" alt="PeakLog peak detail screenshot with date, notes, and photos">
+          <img src="./assets/explore-nearby-peaks.jpg" alt="PeakLog map screenshot">
+          <img src="./assets/browse-peakbagging-lists.jpg" alt="PeakLog list library screenshot">
+          <img src="./assets/sync-your-progress.jpg" alt="PeakLog profile and iCloud sync screenshot">
+        </div>
+      </div>
+    </section>
+
+    <section class="cta">
+      <div class="cta-box">
+        <div>
+          <h2>Start your next list.</h2>
+          <p>PeakLog is available on iPhone for hikers who want a focused peakbagging tracker.</p>
+        </div>
+        <a class="button" href="https://apps.apple.com/us/app/peaklog-peak-bagging-tracker/id6759690599">Open PeakLog on the App Store</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <span>PeakLog by IdealWorks</span>
+      <div class="footer-links">
+        <a href="mailto:peaklogfeedback@gmail.com">Contact</a>
+        <a href="https://idealworksapps.github.io/peaklog-privacy/">Privacy Policy</a>
+        <a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/">Terms of Use</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
